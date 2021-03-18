@@ -1,17 +1,31 @@
-import { MatchData, Resolver } from "./router";
+import { MatchData, Resolver, ResolverParams, Seg } from "./router";
 import matchPath from "./match-path";
-import React from "react";
 
-export const pageLoader: Resolver = async function pageLoader({
-  location,
-  depth,
-  parents,
-  segs,
-}) {
-  await new Promise((res) => setTimeout(res, 500));
+export const pageLoader: Resolver = async function pageLoader(input) {
+  const { seg, data } = lookup(input);
+  if (seg && data) {
+    return {
+      component: (await seg.importer()).default,
+      query: {},
+      params: data.params,
+    };
+  }
+  return { component: null, query: {}, params: {} };
+};
+
+export function lookup(
+  params: ResolverParams,
+): { seg: Seg | undefined; data: MatchData | undefined } {
+  const {
+    location,
+    depth,
+    parents,
+    segs,
+  } = params;
   const psegs = ["/", ...location.pathname.slice(1).split("/")].filter(
     Boolean,
   );
+
   const curr = location.pathname === "/" ? "/" : psegs[depth + 1];
   let matchingSeg: any;
   let matchingData: MatchData | null = null;
@@ -51,21 +65,13 @@ export const pageLoader: Resolver = async function pageLoader({
   }
 
   if (!matchingSeg || !matchingData) {
-    return {
-      component: null,
-      query: {},
-      params: {},
-    };
+    return { data: undefined, seg: undefined };
   }
   let nextUrl = "" + matchingSeg.key;
   let matched = segs.find((seg) => seg.key === nextUrl);
   if (!matched) {
-    console.log("-->", segs);
-    throw new Error("no match");
+    console.log("no match");
+    // throw new Error("no match");
   }
-  return {
-    component: (await matched.importer()).default,
-    query: {},
-    params: matchingData.params,
-  };
-};
+  return { seg: matched, data: matchingData };
+}

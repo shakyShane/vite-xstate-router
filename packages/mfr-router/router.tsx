@@ -45,6 +45,7 @@ export type Seg = {
   key: string;
   as: string;
   importer: () => Promise<any>;
+  cmp?: any;
 };
 export type ResolverParams = {
   location: History["location"];
@@ -159,7 +160,8 @@ export function createRouterMachine(
             ctx.parents,
             ctx.segs,
           );
-          const output = await resolver({
+          let output;
+          output = await resolver({
             location,
             depth: ctx.depth,
             parents: ctx.parents,

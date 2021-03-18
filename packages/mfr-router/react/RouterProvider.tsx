@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useMemo,
 } from "react";
-import { pageLoader } from "../page-loader";
+import { lookup, pageLoader } from "../page-loader";
 import { useMachine } from "@xstate/react";
 import { createRouterMachine, DataLoader, Resolver, Seg } from "../router";
 import { BaseRouterContext } from "./BaseRouterProvider";
@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Matcher } from "../router-base";
 
 const defaultParents: string[] = [];
+const SHOW_LOADER = false;
 
 export const RouterContext = createContext<{
   send: any;
@@ -71,12 +72,12 @@ export function RouterProvider(props: PropsWithChildren<ProviderProps>) {
       dataLoader,
     );
     if (typeof window !== "undefined") return base;
-    if (routers[currentDepth]?.component) {
-      return base.withContext({
-        ...base.context,
-        component: routers[currentDepth].component,
-      } as any);
-    }
+    // if (routers[currentDepth]?.component) {
+    //   return base.withContext({
+    //     ...base.context,
+    //     component: routers[currentDepth].component,
+    //   } as any);
+    // }
     return base;
   }, [currentDepth, dataLoader, history.location, parents, resolver, segs]);
 
@@ -150,14 +151,33 @@ export function RouterProvider(props: PropsWithChildren<ProviderProps>) {
   // console.log("-->", state.context);
   // console.log("-->", state.value);
 
+  let ssrCmp;
+
+  if (import.meta.env.SSR) {
+    const { seg, data } = lookup({
+      depth: currentDepth,
+      location: history.location,
+      parents,
+      segs,
+    });
+    if (seg && seg.cmp) {
+      ssrCmp = seg.cmp.default;
+    }
+  }
+
   return (
     <RouterContext.Provider value={api}>
+      {ssrCmp && (
+        <div style={{ padding: "20px", border: "1px solid red" }}>
+          {React.createElement(ssrCmp)}
+        </div>
+      )}
       {state.context.component && (
         <div style={{ padding: "20px", border: "1px solid red" }}>
           {React.createElement(state.context.component)}
         </div>
       )}
-      {state.value === "resolving" && typeof window !== "undefined" && (
+      {SHOW_LOADER && state.value === "resolving" && typeof window !== "undefined" && (
         <span
           style={{
             fontSize: "20px",

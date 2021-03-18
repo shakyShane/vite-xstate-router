@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link } from "../../packages/mfr-router";
-console.log("evaled contact");
 export default function Contact() {
   return (
     <div>

@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { Link } from "../../packages/mfr-router";
-const modules = import.meta.url;
-console.log(import.meta.url);
 export default function About() {
   return (
     <div>

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Seg } from "../../../packages/mfr-router/router";
 import { Link, Outlet } from "../../../packages/mfr-router";
-console.log("evaled user");
 
 const m1 = import.meta.glob("./*.tsx");
 
@@ -9,23 +8,24 @@ const reachable = {
   ...m1,
 };
 
-console.log(reachable);
-
 const segs: Seg[] = [
   { key: "./Login.tsx", as: "login", importer: reachable["./Login.tsx"] },
   { key: "./Orders.tsx", as: "orders", importer: reachable["./Orders.tsx"] },
 ];
 
+if (import.meta.env.SSR) {
+  const m1 = import.meta.globEager("./*.tsx");
+  segs.forEach((seg) => {
+    const match = m1[seg.key];
+    seg.cmp = match;
+  });
+}
+
 export default function User() {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    const int = setInterval(() => setCount((x) => x + 1), 1000);
-    return () => clearInterval(int);
-  }, []);
   return (
     <div>
       <h1>
-        User <small>{count}</small>
+        User <Counter />
       </h1>
       <ul>
         <li>
@@ -44,4 +44,14 @@ export default function User() {
       <Outlet segs={segs} />
     </div>
   );
+}
+
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const int = setInterval(() => setCount((x) => x + 1), 1000);
+    return () => clearInterval(int);
+  }, []);
+  return <small>{count}</small>
 }

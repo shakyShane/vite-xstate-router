@@ -15,16 +15,10 @@ export const BaseRouterContext = createContext<{
   history: History;
   send: Interpreter<any, any, BaseEvt>["send"];
   service: any;
-  routers: Record<number, Context>;
-  register(ctx: Context);
 }>({
   send: null as any,
   service: null,
   history: null as any,
-  routers: {},
-  register: (ctx: Context) => {
-    console.error("implementation of register missing");
-  },
 });
 
 const noop = () => {
@@ -35,12 +29,9 @@ type BaseRouterProps = {
   location: History["location"];
   resolvers?: { add() };
   dataLoaders?: { add() };
-  routers: Record<number, Context>;
-  register(ctx: Context);
 };
 
 export function BaseRouterProvider(props: PropsWithChildren<BaseRouterProps>) {
-  const { routers, register } = props;
   const [state, send, service] = useMachine(baseMachine, { devTools: true });
   const bh = useConstant(() => {
     if (typeof window === "undefined") {
@@ -60,8 +51,8 @@ export function BaseRouterProvider(props: PropsWithChildren<BaseRouterProps>) {
     };
   }, [send]);
   const api = useMemo(() => {
-    return { history: bh, send, service, routers, register };
-  }, [send, service, routers, register]);
+    return { history: bh, send, service };
+  }, [send, service ]);
   return (
     <BaseRouterContext.Provider value={api}>
       {props.children}
