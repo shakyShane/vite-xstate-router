@@ -84,14 +84,6 @@ export function RouterProvider(props: PropsWithChildren<ProviderProps>) {
           ...base.context,
           component: seg.cmp.default,
           dataLoader: seg.cmp.dataLoader,
-          resolveData: {
-            loading: false,
-            error: null,
-            data: {
-              query: {},
-              params: data.params,
-            },
-          },
         } as any);
       } else {
         debug("could NOT load SSR component, location = %O", history.location);
@@ -99,8 +91,6 @@ export function RouterProvider(props: PropsWithChildren<ProviderProps>) {
     }
     return base;
   }, [currentDepth, history.location, parents, resolver, segs]);
-
-  console.log("SSR machine.conxt", machine.context);
 
   const [state, send, service] = useMachine(machine, {
     devTools: true,
