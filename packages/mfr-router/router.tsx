@@ -1,10 +1,10 @@
 import React from "react";
 import { assign, DoneInvokeEvent, Machine, send } from "xstate";
 import { History } from "history";
-import debugpkg from "debug";
+import { createDebug } from "./debug";
 
-const debug = debugpkg("router");
-const trace = debugpkg("router:trace");
+const debug = createDebug("router.tsx");
+const trace = createDebug("router.tsx:trace");
 
 export type Context = {
   location: History["location"];
@@ -12,16 +12,19 @@ export type Context = {
   parents: Array<string>;
   segs: Seg[];
   component: null | any;
-  resolveData: {
-    loading: boolean;
-    data: ResolveData;
-    error: string | null;
-  };
+  dataLoader: null | any;
+  resolveData: ResolveData;
   routeData: {
     loading: boolean;
     data: any;
     error: string | null;
   };
+};
+
+export type ResolveData = {
+  loading: boolean;
+  error: string | null;
+  data: ResolveDataParams;
 };
 
 // prettier-ignore
@@ -55,15 +58,17 @@ export type ResolverParams = {
 };
 export type Resolver = (params: ResolverParams) => Promise<ResolveResult>;
 
-export type DataLoader = (resolve: ResolveData) => Promise<any>;
+export type DataLoader = (resolve: ResolveDataParams) => Promise<any>;
 
 type ResolveResult = {
   component?: any;
+  dataLoader?: any;
   query: Record<string, any>;
   params: Record<string, any>;
   status?: number;
 };
-type ResolveData = {
+
+export type ResolveDataParams = {
   query: Record<string, any>;
   params: Record<string, any>;
 };
@@ -75,7 +80,6 @@ export function createRouterMachine(
   depth: number,
   location: History["location"],
   resolver?: Resolver,
-  dataLoader?: DataLoader,
 ) {
   return Machine<Context, Record<string, any>, Events>(
     {
@@ -87,6 +91,7 @@ export function createRouterMachine(
         segs,
         parents,
         component: null,
+        dataLoader: null,
         resolveData: {
           loading: false,
           data: {
@@ -166,14 +171,17 @@ export function createRouterMachine(
             parents: ctx.parents,
             segs: ctx.segs,
           });
+          console.log("...", output);
           trace("++ resolved %o", output);
           return { ...output, location };
         },
         loadData: async (ctx, evt) => {
-          if (!dataLoader) {
+          console.log("resolve data for route plz...");
+          if (!ctx.dataLoader) {
             return null;
           }
-          const output = await dataLoader(ctx.resolveData.data);
+          const output = await ctx.dataLoader(ctx.resolveData.data);
+          console.log("output", output);
           trace("output from loadData = %o", output);
           return output;
         },
@@ -192,6 +200,10 @@ export function createRouterMachine(
               loading: false,
               data: rest,
             };
+          },
+          dataLoader: (ctx, evt) => {
+            const e = evt as DoneInvokeEvent<ResolveResult>;
+            return e.data.dataLoader || null;
           },
         }),
         assignResolveLoading: assign({

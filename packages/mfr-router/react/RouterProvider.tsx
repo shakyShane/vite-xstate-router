@@ -11,7 +11,8 @@ import { createRouterMachine, DataLoader, Resolver, Seg } from "../router";
 import { BaseRouterContext } from "./BaseRouterProvider";
 import { v4 as uuidv4 } from "uuid";
 import { Matcher } from "../router-base";
-
+import { createDebug } from "../debug";
+const debug = createDebug("RouterProvider");
 const defaultParents: string[] = [];
 const SHOW_LOADER = false;
 
@@ -28,16 +29,14 @@ export const RouterContext = createContext<{
 });
 
 type ProviderProps = {
-  dataLoader?: DataLoader;
   resolver?: Resolver;
   fallback?: () => React.ReactNode;
   segs: Seg[];
 };
-const noopDataLoader = () => Promise.resolve({});
 
 export function RouterProvider(props: PropsWithChildren<ProviderProps>) {
   let { resolver } = props;
-  const { dataLoader = noopDataLoader, segs } = props;
+  const { segs } = props;
   if (!resolver) {
     resolver = pageLoader;
   }
@@ -66,27 +65,42 @@ export function RouterProvider(props: PropsWithChildren<ProviderProps>) {
       currentDepth,
       history.location,
       resolver,
-      dataLoader,
     );
     if (typeof window !== "undefined") return base;
     if (import.meta.env.SSR) {
-      const { seg, data: _ } = lookup({
+      const { seg, data } = lookup({
         depth: currentDepth,
         location: history.location,
         parents,
         segs,
       });
-      if (seg && seg.cmp) {
+      if (seg && seg.cmp && data) {
+        debug(
+          "+++ loading ssr component, key=%o, location = %o",
+          seg.key,
+          history.location,
+        );
         return base.withContext({
           ...base.context,
           component: seg.cmp.default,
+          dataLoader: seg.cmp.dataLoader,
+          resolveData: {
+            loading: false,
+            error: null,
+            data: {
+              query: {},
+              params: data.params,
+            },
+          },
         } as any);
       } else {
-        console.log("could not load SSR component");
+        debug("could NOT load SSR component, location = %O", history.location);
       }
     }
     return base;
-  }, [currentDepth, dataLoader, history.location, parents, resolver, segs]);
+  }, [currentDepth, history.location, parents, resolver, segs]);
+
+  console.log("SSR machine.conxt", machine.context);
 
   const [state, send, service] = useMachine(machine, {
     devTools: true,

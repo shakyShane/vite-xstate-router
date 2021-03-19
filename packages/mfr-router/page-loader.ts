@@ -4,13 +4,15 @@ import matchPath from "./match-path";
 export const pageLoader: Resolver = async function pageLoader(input) {
   const { seg, data } = lookup(input);
   if (seg && data) {
+    const mod = await seg.importer();
     return {
-      component: (await seg.importer()).default,
+      dataLoader: mod.dataLoader,
+      component: mod.default,
       query: {},
       params: data.params,
     };
   }
-  return { component: null, query: {}, params: {} };
+  return { component: null, dataLoader: null, query: {}, params: {} };
 };
 
 export function lookup(
