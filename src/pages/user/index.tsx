@@ -53,5 +53,5 @@ function Counter() {
     const int = setInterval(() => setCount((x) => x + 1), 1000);
     return () => clearInterval(int);
   }, []);
-  return <small>{count}</small>
+  return <small>{count}</small>;
 }

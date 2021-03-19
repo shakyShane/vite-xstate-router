@@ -9,7 +9,7 @@ import { Interpreter } from "xstate";
 import { useMachine } from "@xstate/react";
 import useConstant from "@xstate/react/lib/useConstant";
 import { BaseEvt, baseMachine } from "../router-base";
-import { Context } from "../router";
+// import { Context } from "../router";
 
 export const BaseRouterContext = createContext<{
   history: History;
@@ -32,7 +32,7 @@ type BaseRouterProps = {
 };
 
 export function BaseRouterProvider(props: PropsWithChildren<BaseRouterProps>) {
-  const [state, send, service] = useMachine(baseMachine, { devTools: true });
+  const [_, send, service] = useMachine(baseMachine, { devTools: true });
   const bh = useConstant(() => {
     if (typeof window === "undefined") {
       return { location: props.location, listen: noop } as any;
@@ -49,10 +49,10 @@ export function BaseRouterProvider(props: PropsWithChildren<BaseRouterProps>) {
         unlisten();
       }
     };
-  }, [send]);
+  }, [bh, send]);
   const api = useMemo(() => {
     return { history: bh, send, service };
-  }, [send, service ]);
+  }, [bh, send, service]);
   return (
     <BaseRouterContext.Provider value={api}>
       {props.children}

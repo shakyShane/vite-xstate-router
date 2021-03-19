@@ -1,4 +1,3 @@
-import { Link } from "../../../packages/mfr-router";
 import React from "react";
 
 export default function Login() {

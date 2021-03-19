@@ -160,8 +160,7 @@ export function createRouterMachine(
             ctx.parents,
             ctx.segs,
           );
-          let output;
-          output = await resolver({
+          const output = await resolver({
             location,
             depth: ctx.depth,
             parents: ctx.parents,

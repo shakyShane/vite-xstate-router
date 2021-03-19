@@ -30,7 +30,7 @@ export function lookup(
   let matchingSeg: any;
   let matchingData: MatchData | null = null;
 
-  let earlyMatch = segs.find((seg) => {
+  const earlyMatch = segs.find((seg) => {
     return seg.as === curr;
   });
 
@@ -42,7 +42,7 @@ export function lookup(
   }
 
   if (!matchingSeg) {
-    segs.forEach((seg, i) => {
+    segs.forEach((seg) => {
       if (matchingSeg) return;
 
       if (seg.as === "/" && location.pathname === "/") {
@@ -67,8 +67,8 @@ export function lookup(
   if (!matchingSeg || !matchingData) {
     return { data: undefined, seg: undefined };
   }
-  let nextUrl = "" + matchingSeg.key;
-  let matched = segs.find((seg) => seg.key === nextUrl);
+  const nextUrl = "" + matchingSeg.key;
+  const matched = segs.find((seg) => seg.key === nextUrl);
   if (!matched) {
     console.log("no match");
     // throw new Error("no match");

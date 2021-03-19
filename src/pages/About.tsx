@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "../../packages/mfr-router";
 export default function About() {
   return (

@@ -4,7 +4,7 @@ import { createLocation } from "history";
 import { BaseRouterProvider } from "../packages/mfr-router";
 import React from "react";
 
-export async function render(url, context) {
+export async function render(url, _context) {
   return ReactDOMServer.renderToString(
     <BaseRouterProvider
       location={createLocation(url)}

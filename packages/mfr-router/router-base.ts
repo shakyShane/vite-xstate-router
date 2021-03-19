@@ -143,7 +143,7 @@ export const baseMachine = Machine<BaseContext, Record<string, any>, BaseEvt>(
 export function select(inputs: SelectParams) {
   trace("considering %o", inputs);
   let matchData;
-  let match = inputs.inputs.find((m) => {
+  const match = inputs.inputs.find((m) => {
     const input = { path: m.path, exact: inputs.exact };
     trace("[select] ? pathname=%o vs %o", inputs.pathname, input);
     const res = matchPath(inputs.pathname, input);

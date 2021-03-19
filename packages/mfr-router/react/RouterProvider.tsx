@@ -34,7 +34,6 @@ type ProviderProps = {
   segs: Seg[];
 };
 const noopDataLoader = () => Promise.resolve({});
-const noopResolver = () => Promise.resolve({});
 
 export function RouterProvider(props: PropsWithChildren<ProviderProps>) {
   let { resolver } = props;
@@ -52,11 +51,9 @@ export function RouterProvider(props: PropsWithChildren<ProviderProps>) {
     history,
     service: baseRouterService,
     send: baseRouterSend,
-    routers,
   } = baseRouter;
   const {
     send: parentSend,
-    service: parentService,
     prev,
     parents,
   } = useContext(RouterContext);
@@ -72,12 +69,22 @@ export function RouterProvider(props: PropsWithChildren<ProviderProps>) {
       dataLoader,
     );
     if (typeof window !== "undefined") return base;
-    // if (routers[currentDepth]?.component) {
-    //   return base.withContext({
-    //     ...base.context,
-    //     component: routers[currentDepth].component,
-    //   } as any);
-    // }
+    if (import.meta.env.SSR) {
+      const { seg, data: _ } = lookup({
+        depth: currentDepth,
+        location: history.location,
+        parents,
+        segs,
+      });
+      if (seg && seg.cmp) {
+        return base.withContext({
+          ...base.context,
+          component: seg.cmp.default,
+        } as any);
+      } else {
+        console.log("could not load SSR component");
+      }
+    }
     return base;
   }, [currentDepth, dataLoader, history.location, parents, resolver, segs]);
 
@@ -147,50 +154,28 @@ export function RouterProvider(props: PropsWithChildren<ProviderProps>) {
     };
   }, [send, service, currentDepth, baseParents]);
 
-  // console.log("-->", state.context.component);
-  // console.log("-->", state.context);
-  // console.log("-->", state.value);
-
-  let ssrCmp;
-
-  if (import.meta.env.SSR) {
-    const { seg, data } = lookup({
-      depth: currentDepth,
-      location: history.location,
-      parents,
-      segs,
-    });
-    if (seg && seg.cmp) {
-      ssrCmp = seg.cmp.default;
-    }
-  }
-
   return (
     <RouterContext.Provider value={api}>
-      {ssrCmp && (
-        <div style={{ padding: "20px", border: "1px solid red" }}>
-          {React.createElement(ssrCmp)}
-        </div>
-      )}
       {state.context.component && (
         <div style={{ padding: "20px", border: "1px solid red" }}>
           {React.createElement(state.context.component)}
         </div>
       )}
-      {SHOW_LOADER && state.value === "resolving" && typeof window !== "undefined" && (
-        <span
-          style={{
-            fontSize: "20px",
-            position: "absolute",
-            top: "5px",
-            right: "5px",
-            background: "white",
-            padding: "5px",
-          }}
-        >
-          resolving route...
-        </span>
-      )}
+      {SHOW_LOADER && state.value === "resolving" &&
+        typeof window !== "undefined" && (
+          <span
+            style={{
+              fontSize: "20px",
+              position: "absolute",
+              top: "5px",
+              right: "5px",
+              background: "white",
+              padding: "5px",
+            }}
+          >
+            resolving route...
+          </span>
+        )}
       {props.children}
     </RouterContext.Provider>
   );
