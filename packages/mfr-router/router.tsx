@@ -1,7 +1,7 @@
 import React from "react";
-import { assign, DoneInvokeEvent, Machine, send } from "xstate";
-import { History } from "history";
-import { createDebug } from "./debug";
+import {assign, DoneInvokeEvent, Machine, send} from "xstate";
+import {History} from "history";
+import {createDebug} from "./debug";
 
 const debug = createDebug("router.tsx");
 const trace = createDebug("router.tsx:trace");
@@ -31,11 +31,11 @@ export type ResolveData = {
 type Events =
   | { type: "xstate.init" }
   | {
-    type: "HISTORY_EVT";
-    location: History["location"];
-    depth: number;
-    matchData: MatchData;
-  }
+  type: "HISTORY_EVT";
+  location: History["location"];
+  depth: number;
+  matchData: MatchData;
+}
   | { type: "NOTIFY_RESOLVED" };
 
 export type MatchData = {
@@ -107,7 +107,7 @@ export function createRouterMachine(
         },
       },
       on: {
-        HISTORY_EVT: [{ target: "resolving", cond: "matchedDepth" }],
+        HISTORY_EVT: [{target: "resolving", cond: "matchedDepth"}],
       },
       states: {
         invalid: {},
@@ -171,9 +171,8 @@ export function createRouterMachine(
             parents: ctx.parents,
             segs: ctx.segs,
           });
-          console.log("...", output);
           trace("++ resolved %o", output);
-          return { ...output, location };
+          return {...output, location};
         },
         loadData: async (ctx, evt) => {
           console.log("resolve data for route plz...");
@@ -181,7 +180,6 @@ export function createRouterMachine(
             return null;
           }
           const output = await ctx.dataLoader(ctx.resolveData.data);
-          console.log("output", output);
           trace("output from loadData = %o", output);
           return output;
         },
@@ -194,7 +192,7 @@ export function createRouterMachine(
           },
           resolveData: (ctx, evt) => {
             const e = evt as DoneInvokeEvent<ResolveResult>;
-            const { component, ...rest } = e.data;
+            const {component, ...rest} = e.data;
             return {
               ...ctx.resolveData,
               loading: false,

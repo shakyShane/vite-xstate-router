@@ -12,6 +12,7 @@ import { BaseRouterContext } from "./BaseRouterProvider";
 import { v4 as uuidv4 } from "uuid";
 import { Matcher } from "../router-base";
 import { createDebug } from "../debug";
+import {interpret} from "xstate";
 const debug = createDebug("RouterProvider");
 const defaultParents: string[] = [];
 const SHOW_LOADER = false;
@@ -33,6 +34,7 @@ type ProviderProps = {
   fallback?: () => React.ReactNode;
   segs: Seg[];
 };
+const sent = false;
 
 export function RouterProvider(props: PropsWithChildren<ProviderProps>) {
   let { resolver } = props;
@@ -50,6 +52,7 @@ export function RouterProvider(props: PropsWithChildren<ProviderProps>) {
     history,
     service: baseRouterService,
     send: baseRouterSend,
+    mapping,
   } = baseRouter;
   const {
     send: parentSend,
@@ -68,33 +71,21 @@ export function RouterProvider(props: PropsWithChildren<ProviderProps>) {
     );
     if (typeof window !== "undefined") return base;
     if (import.meta.env.SSR) {
-      const { seg, data } = lookup({
-        depth: currentDepth,
-        location: history.location,
-        parents,
-        segs,
-      });
-      if (seg && seg.cmp && data) {
-        debug(
-          "+++ loading ssr component, key=%o, location = %o",
-          seg.key,
-          history.location,
-        );
-        return base.withContext({
-          ...base.context,
-          component: seg.cmp.default,
-          dataLoader: seg.cmp.dataLoader,
-        } as any);
-      } else {
-        debug("could NOT load SSR component, location = %O", history.location);
+      if (mapping[history.location.pathname]) {
+        return base.withContext(mapping[history.location.pathname])
       }
     }
     return base;
-  }, [currentDepth, history.location, parents, resolver, segs]);
+  }, [currentDepth, history.location, parents, resolver, segs, mapping]);
 
   const [state, send, service] = useMachine(machine, {
     devTools: true,
   });
+
+  if (import.meta.env.SSR) {
+    // const i = interpret(machine);
+    baseRouter.services.push(service);
+  }
 
   useEffect(() => {
     const matchers: Matcher[] = [];

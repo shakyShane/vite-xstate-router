@@ -1,9 +1,10 @@
 import React from "react";
-import { Link } from "../../packages/mfr-router";
+import {Link, useRouteData} from "../../packages/mfr-router";
 
 export default function Home() {
+  const {data} = useRouteData();
   return <div>
-    <h1>Home</h1>
+    <h1>{data && data.title}</h1>
     <ul>
       <li>
         <Link to={"/contact"}>Contact</Link>
@@ -19,4 +20,9 @@ export default function Home() {
       </li>
     </ul>
   </div>;
+}
+
+export async function dataLoader() {
+  console.log('GETTING DATAZ');
+  return {title: "Homepage is here"}
 }

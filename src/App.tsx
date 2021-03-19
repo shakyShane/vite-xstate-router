@@ -30,18 +30,18 @@ const segs: Seg[] = [
   },
 ];
 
-if (import.meta.env.SSR) {
-  const m1 = import.meta.globEager("./pages/*.tsx");
-  const m2 = import.meta.globEager("./pages/user/index.tsx");
-  const reachable = {
-    ...m1,
-    ...m2,
-  };
-  segs.forEach((seg) => {
-    const match = reachable[seg.key];
-    seg.cmp = match;
-  });
-}
+// if (import.meta.env.SSR) {
+//   const m1 = import.meta.globEager("./pages/*.tsx");
+//   const m2 = import.meta.globEager("./pages/user/index.tsx");
+//   const reachable = {
+//     ...m1,
+//     ...m2,
+//   };
+//   segs.forEach((seg) => {
+//     const match = reachable[seg.key];
+//     seg.cmp = match;
+//   });
+// }
 
 function App() {
   return (
