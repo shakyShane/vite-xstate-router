@@ -14,21 +14,18 @@ export default function Orders() {
   return (
     <div>
       <h2>Your orders</h2>
-      {resolveData.loading && <p>resolving...</p>}
-      {!resolveData.loading && resolveData.data && (
-        <p>{JSON.stringify(resolveData.data, null, 2)}</p>
+      {resolveData && (
+        <pre><code>{JSON.stringify(resolveData, null, 2)}</code></pre>
       )}
       {loading && <p>data loading......</p>}
       {!loading && data && (
-        <p>{JSON.stringify(data, null, 2)}</p>
+        <pre><code>{JSON.stringify(data, null, 2)}</code></pre>
       )}
     </div>
   );
 }
 
 export async function dataLoader(resolveData: ResolveDataParams) {
-  console.log("SSR data loader begin", resolveData);
   await new Promise((res) => setTimeout(res, 500));
-  console.log("SSR data loader end", resolveData);
-  return { name: "shane" };
+  return { name: "data from Orders..." };
 }

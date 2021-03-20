@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Seg } from "../../../packages/mfr-router/router";
-import { Link, Outlet } from "../../../packages/mfr-router";
+import {
+  Link,
+  Outlet,
+  useResolveData,
+  useRouteData,
+} from "../../../packages/mfr-router";
 
 const m1 = import.meta.glob("./*.tsx");
 
@@ -22,11 +27,19 @@ if (import.meta.env.SSR) {
 }
 
 export default function User() {
+  const routeData = useRouteData();
+  const resolveData = useResolveData();
   return (
     <div>
       <h1>
         User <Counter />
       </h1>
+      {routeData.data && (
+        <pre><code>{JSON.stringify(routeData.data)}</code></pre>
+      )}
+      {resolveData && (
+        <pre><code>{JSON.stringify(resolveData, null, 2)}</code></pre>
+      )}
       <ul>
         <li>
           <Link to={"/"}>Home</Link>
@@ -54,4 +67,9 @@ function Counter() {
     return () => clearInterval(int);
   }, []);
   return <small>{count}</small>;
+}
+
+export async function dataLoader(ctx) {
+  console.log(ctx);
+  return { name: "data from User..." };
 }

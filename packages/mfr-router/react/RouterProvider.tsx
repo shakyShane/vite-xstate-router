@@ -12,7 +12,7 @@ import { BaseRouterContext } from "./BaseRouterProvider";
 import { v4 as uuidv4 } from "uuid";
 import { Matcher } from "../router-base";
 import { createDebug } from "../debug";
-import {interpret} from "xstate";
+import { interpret } from "xstate";
 const debug = createDebug("RouterProvider");
 const defaultParents: string[] = [];
 const SHOW_LOADER = false;
@@ -71,8 +71,8 @@ export function RouterProvider(props: PropsWithChildren<ProviderProps>) {
     );
     if (typeof window !== "undefined") return base;
     if (import.meta.env.SSR) {
-      if (mapping[history.location.pathname]) {
-        return base.withContext(mapping[history.location.pathname])
+      if (mapping[String(currentDepth)]) {
+        return base.withContext(mapping[String(currentDepth)]);
       }
     }
     return base;
@@ -84,7 +84,10 @@ export function RouterProvider(props: PropsWithChildren<ProviderProps>) {
 
   if (import.meta.env.SSR) {
     // const i = interpret(machine);
-    baseRouter.services.push(service);
+    if (!mapping[String(currentDepth)]) {
+      console.log("adding...");
+      baseRouter.services.push([currentDepth, service]);
+    }
   }
 
   useEffect(() => {

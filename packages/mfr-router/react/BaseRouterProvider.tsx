@@ -15,14 +15,14 @@ export const BaseRouterContext = createContext<{
   history: History;
   send: Interpreter<any, any, BaseEvt>["send"];
   service: any;
-  services: Interpreter<any, any, any>[];
+  services: [number, Interpreter<any, any, any>][];
   mapping: Record<number, any>;
 }>({
   send: null as any,
   service: null,
   history: null as any,
   services: [],
-  mapping: {}
+  mapping: {},
 });
 
 const noop = () => {
@@ -31,8 +31,8 @@ const noop = () => {
 
 type BaseRouterProps = {
   location: History["location"];
-  services: Interpreter<any>[];
-  mapping: Record<number, any>;
+  services: [number, Interpreter<any, any, any>][];
+  mapping: Record<string, any>;
 };
 
 export function BaseRouterProvider(props: PropsWithChildren<BaseRouterProps>) {
@@ -55,7 +55,13 @@ export function BaseRouterProvider(props: PropsWithChildren<BaseRouterProps>) {
     };
   }, [bh, send]);
   const api = useMemo(() => {
-    return { history: bh, send, service, services: props.services, mapping: props.mapping };
+    return {
+      history: bh,
+      send,
+      service,
+      services: props.services,
+      mapping: props.mapping,
+    };
   }, [bh, send, service, props.services, props.mapping]);
   return (
     <BaseRouterContext.Provider value={api}>

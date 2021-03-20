@@ -3,22 +3,18 @@ import App from "./App";
 import { createLocation } from "history";
 import { BaseRouterProvider } from "../packages/mfr-router";
 import React from "react";
-import {Interpreter} from "xstate";
+import { Interpreter } from "xstate";
 
 export async function render(url, _context) {
-  const services: Interpreter<any>[] = [];
+  const services: [number, Interpreter<any>][] = [];
   const mapping = {};
-  let depth = 0;
-  let res = '';
+  let res = "";
   async function run() {
-    if (depth === 2) {
-      return;
-    }
     res = ReactDOMServer.renderToString(
       <BaseRouterProvider
         location={createLocation(url)}
-        services={services}
         mapping={mapping}
+        services={services}
       >
         <App />
       </BaseRouterProvider>,
@@ -26,31 +22,33 @@ export async function render(url, _context) {
     if (services.length > 0) {
       const p = new Promise((res) => {
         console.log("services.length = %o", services.length);
-        const i = services.shift();
-        if (!i) {
+        const next = services.shift();
+        if (!next) {
           console.log("could not access");
           res({});
           return;
         }
+        const [depth, i] = next;
         // console.log('sub');
-        i.start().onTransition(x => {
+        i.start().onTransition((x) => {
           switch (x.event.type) {
             case "xstate.init": {
               /* noop */
               break;
             }
             case "NOTIFY_RESOLVED": {
-              console.log("~~NOTIFY_RESOLVED", x.event)
-              mapping[x.context.location.pathname] = {...x.context};
+              console.log("~~NOTIFY_RESOLVED", x.event);
+              mapping[String(depth)] = { ...x.context };
               res({});
               break;
             }
-            default: console.log("+++", x.event)
+            default:
+              console.log("+++", x.event);
           }
-        })
+        });
       });
-      depth += 1;
       await p;
+      console.log("done waitin");
       await run();
     }
   }
