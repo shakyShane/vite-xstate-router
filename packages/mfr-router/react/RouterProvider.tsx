@@ -12,8 +12,8 @@ import { BaseRouterContext } from "./BaseRouterProvider";
 import { v4 as uuidv4 } from "uuid";
 import { Matcher } from "../router-base";
 import { createDebug } from "../debug";
-import { interpret } from "xstate";
 const debug = createDebug("RouterProvider");
+const ssrdebug = createDebug("RouterProvider:ssr");
 const defaultParents: string[] = [];
 const SHOW_LOADER = false;
 
@@ -71,8 +71,9 @@ export function RouterProvider(props: PropsWithChildren<ProviderProps>) {
     );
     if (typeof window !== "undefined") return base;
     if (import.meta.env.SSR) {
-      if (mapping[String(currentDepth)]) {
-        return base.withContext(mapping[String(currentDepth)]);
+      const next = mapping[String(currentDepth)];
+      if (next) {
+        return base.withContext(next);
       }
     }
     return base;

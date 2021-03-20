@@ -4,6 +4,9 @@ import { createLocation } from "history";
 import { BaseRouterProvider } from "../packages/mfr-router";
 import React from "react";
 import { Interpreter } from "xstate";
+import {createDebug} from "../packages/mfr-router/debug";
+
+const debug = createDebug("entry-server.tsx")
 
 export async function render(url, _context) {
   const services: [number, Interpreter<any>][] = [];
@@ -21,10 +24,10 @@ export async function render(url, _context) {
     );
     if (services.length > 0) {
       const p = new Promise((res) => {
-        console.log("services.length = %o", services.length);
+        debug("services.length = %o", services.length);
         const next = services.shift();
         if (!next) {
-          console.log("could not access");
+          debug("could not access");
           res({});
           return;
         }
@@ -37,14 +40,13 @@ export async function render(url, _context) {
               break;
             }
             case "NOTIFY_RESOLVED": {
-              console.log("~~NOTIFY_RESOLVED", x.event);
-              console.log("x.context", x.context);
+              debug("%O", "NOTIFY_RESOLVED");
               mapping[String(depth)] = { ...x.context };
               res({});
               break;
             }
             default:
-              console.log("+++", x.event);
+              debug("EVT=%O", x.event);
           }
         });
       });

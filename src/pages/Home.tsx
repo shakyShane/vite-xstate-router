@@ -24,7 +24,6 @@ export default function Home() {
   </div>;
 }
 
-export async function dataLoader() {
-  console.log("GETTING DATAZ");
+export async function dataLoader(ctx, ctx2) {
   return { title: "Homepage is here" };
 }

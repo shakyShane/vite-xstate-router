@@ -70,6 +70,5 @@ function Counter() {
 }
 
 export async function dataLoader(ctx) {
-  console.log(ctx);
   return { name: "data from User..." };
 }

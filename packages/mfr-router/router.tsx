@@ -158,29 +158,28 @@ export function createRouterMachine(
             trace("location data not found in event");
             return null;
           }
-          trace(
-            "--> pathname=%o, depth=%o parents=%o segs=%o",
-            location.pathname,
-            ctx.depth,
-            ctx.parents,
-            ctx.segs,
-          );
+          trace("resolveComponent --> PREV=%O", ctx.component);
+          trace("resolveComponent --> pathname=%O", location.pathname);
+          trace("resolveComponent --> depth=%O", ctx.depth);
+          trace("resolveComponent --> parents=%O", ctx.parents);
+          trace("resolveComponent --> segs=%O", ctx.segs);
           const output = await resolver({
             location,
             depth: ctx.depth,
             parents: ctx.parents,
             segs: ctx.segs,
           });
-          trace("++ resolved %o", output);
+          await new Promise(res => setTimeout(res, 500));
+          trace("++ resolved %O", output);
           return {...output, location};
         },
         loadData: async (ctx, evt) => {
-          console.log("resolve data for route plz...");
           if (!ctx.dataLoader) {
+            trace("NOT loading data as %O was absent in %O", 'dataLoader');
             return null;
           }
           const output = await ctx.dataLoader(ctx.resolveData.data);
-          trace("output from loadData = %o", output);
+          trace("output from loadData = %O", output);
           return output;
         },
       },
@@ -205,7 +204,10 @@ export function createRouterMachine(
           },
         }),
         assignResolveLoading: assign({
-          resolveData: (ctx) => {
+          resolveData: (ctx, evt) => {
+            if (evt.type === "xstate.init" && import.meta.env.SSR) {
+              return ctx.resolveData;
+            }
             return {
               ...ctx.resolveData,
               loading: true,

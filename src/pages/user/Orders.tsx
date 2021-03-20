@@ -8,8 +8,8 @@ export default function Orders() {
   const { data, loading } = useRouteData();
   const resolveData = useResolveData();
   if (import.meta.env.SSR) {
-    console.log("data from Order->", resolveData);
-    console.log("loading data from Order->", data);
+    // console.log("data from Order->", resolveData);
+    // console.log("loading data from Order->", data);
   }
   return (
     <div>
