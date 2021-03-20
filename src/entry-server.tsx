@@ -38,6 +38,7 @@ export async function render(url, _context) {
             }
             case "NOTIFY_RESOLVED": {
               console.log("~~NOTIFY_RESOLVED", x.event);
+              console.log("x.context", x.context);
               mapping[String(depth)] = { ...x.context };
               res({});
               break;
@@ -48,7 +49,6 @@ export async function render(url, _context) {
         });
       });
       await p;
-      console.log("done waitin");
       await run();
     }
   }

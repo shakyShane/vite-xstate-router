@@ -1,10 +1,12 @@
 import React from "react";
-import {Link, useRouteData} from "../../packages/mfr-router";
+import { Link, useResolveData, useRouteData } from "../../packages/mfr-router";
 
 export default function Home() {
-  const {data} = useRouteData();
+  const { data } = useRouteData();
+  const resolveData = useResolveData();
   return <div>
     <h1>{data && data.title}</h1>
+    <p><code>resolve loading: {String(resolveData.loading)}</code></p>
     <ul>
       <li>
         <Link to={"/contact"}>Contact</Link>
@@ -23,6 +25,6 @@ export default function Home() {
 }
 
 export async function dataLoader() {
-  console.log('GETTING DATAZ');
-  return {title: "Homepage is here"}
+  console.log("GETTING DATAZ");
+  return { title: "Homepage is here" };
 }
